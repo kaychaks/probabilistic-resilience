@@ -157,73 +157,74 @@ endif
 printf("\n\nproperty 1: resistance, having always maintained >=2 connections\n");
 observations = [2,1,2] #plausible observations: [2,1,2], [2,0,2], [2,2,2], [1,1,2]
 encoded_observations = observations.+1;
+encoded_observations
 time_horizon = length(observations);
 
 #full cjpd
-tic();
+## tic();
 state_card = 4;
 observation_card = 4;
-entry = 1;
-state_trajectory = ones(1,time_horizon);
-total_probability = 0;
-for i=1:state_card^time_horizon															#for each trajectory
-		observation_trajectory = ones(1,time_horizon);
-		c_j_p_d(entry).state_trajectory = state_trajectory;
-		c_j_p_d(entry).observation_trajectory = encoded_observations;									
-		c_j_p_d(entry).probability = 0;
-		for j=1:observation_card^time_horizon											#for each observation trajectory
-			if sum(eq(observation_trajectory, encoded_observations)) == time_horizon
-				temporary_probability = (initial_belief*transition_model)(1,state_trajectory(1,1)) * sensor_model(state_trajectory(1,1),observation_trajectory(1,1));
-				for k=2:time_horizon
-					temporary_probability *= transition_model(state_trajectory(1,k-1),state_trajectory(1,k));
-					temporary_probability *= sensor_model(state_trajectory(1,k),observation_trajectory(1,k));
-				endfor
-				c_j_p_d(entry).probability += temporary_probability;
-				total_probability += temporary_probability;								#total probabilty, for normalization	
-			endif
+## entry = 1;
+## state_trajectory = ones(1,time_horizon);
+## total_probability = 0;
+## for i=1:state_card^time_horizon															#for each trajectory
+## 		observation_trajectory = ones(1,time_horizon);
+## 		c_j_p_d(entry).state_trajectory = state_trajectory;
+## 		c_j_p_d(entry).observation_trajectory = encoded_observations;									
+## 		c_j_p_d(entry).probability = 0;
+## 		for j=1:observation_card^time_horizon											#for each observation trajectory
+## 			if sum(eq(observation_trajectory, encoded_observations)) == time_horizon
+## 				temporary_probability = (initial_belief*transition_model)(1,state_trajectory(1,1)) * sensor_model(state_trajectory(1,1),observation_trajectory(1,1));
+## 				for k=2:time_horizon
+## 					temporary_probability *= transition_model(state_trajectory(1,k-1),state_trajectory(1,k));
+## 					temporary_probability *= sensor_model(state_trajectory(1,k),observation_trajectory(1,k));
+## 				endfor
+## 				c_j_p_d(entry).probability += temporary_probability;
+## 				total_probability += temporary_probability;								#total probabilty, for normalization	
+## 			endif
 
-			observation_trajectory(1,time_horizon)++;									#next observation trajectory
-			for k=1:(time_horizon-1)
-				if observation_trajectory(1,time_horizon-k+1) > observation_card
-					observation_trajectory(1,time_horizon-k+1) = 1;
-					observation_trajectory(time_horizon-k)++;
-				endif
-			endfor
-		endfor
-		entry++;
-		state_trajectory(1,time_horizon)++;												#next state trajectory
-		for k=1:(time_horizon-1)
-			if state_trajectory(1,time_horizon-k+1) > state_card
-				state_trajectory(1,time_horizon-k+1) = 1;
-				state_trajectory(time_horizon-k)++;
-			endif
-		endfor
-endfor
-for i =1:length(c_j_p_d)																#normalize conditional distribution
-	c_j_p_d(i).probability = c_j_p_d(i).probability/total_probability;
-endfor
-#s_c_j_p_d = sort_cjpd(c_j_p_d);	
-#for i = 1:length(s_c_j_p_d)
-#	if s_c_j_p_d(i).probability > 0
-#			printf("P(x=[%s]|o=[%s]) = %f\n", vector2string(s_c_j_p_d(i).state_trajectory(1,:)), vector2string(s_c_j_p_d(i).observation_trajectory(1,:)), s_c_j_p_d(i).probability);
-#	endif
-#endfor
-total_probability;
-#sum over relevant trajectories
-property_probability = 0;
-for i = 1:length(c_j_p_d)
-	bool = true;
-	for j = 1:time_horizon
-		if (c_j_p_d(i).state_trajectory(1,j) < 3)
-			bool = false;
-		endif
-	endfor
-	if bool == true
-		property_probability += c_j_p_d(i).probability;
-	endif
-endfor
-property_probability
-TIME_full_cjpd_p1 = toc()
+## 			observation_trajectory(1,time_horizon)++;									#next observation trajectory
+## 			for k=1:(time_horizon-1)
+## 				if observation_trajectory(1,time_horizon-k+1) > observation_card
+## 					observation_trajectory(1,time_horizon-k+1) = 1;
+## 					observation_trajectory(time_horizon-k)++;
+## 				endif
+## 			endfor
+## 		endfor
+## 		entry++;
+## 		state_trajectory(1,time_horizon)++;												#next state trajectory
+## 		for k=1:(time_horizon-1)
+## 			if state_trajectory(1,time_horizon-k+1) > state_card
+## 				state_trajectory(1,time_horizon-k+1) = 1;
+## 				state_trajectory(time_horizon-k)++;
+## 			endif
+## 		endfor
+## endfor
+## for i =1:length(c_j_p_d)																#normalize conditional distribution
+## 	c_j_p_d(i).probability = c_j_p_d(i).probability/total_probability;
+## endfor
+## #s_c_j_p_d = sort_cjpd(c_j_p_d);	
+## #for i = 1:length(s_c_j_p_d)
+## #	if s_c_j_p_d(i).probability > 0
+## #			printf("P(x=[%s]|o=[%s]) = %f\n", vector2string(s_c_j_p_d(i).state_trajectory(1,:)), vector2string(s_c_j_p_d(i).observation_trajectory(1,:)), s_c_j_p_d(i).probability);
+## #	endif
+## #endfor
+## total_probability;
+## #sum over relevant trajectories
+## property_probability = 0;
+## for i = 1:length(c_j_p_d)
+## 	bool = true;
+## 	for j = 1:time_horizon
+## 		if (c_j_p_d(i).state_trajectory(1,j) < 3)
+## 			bool = false;
+## 		endif
+## 	endfor
+## 	if bool == true
+## 		property_probability += c_j_p_d(i).probability;
+## 	endif
+## endfor
+## property_probability
+## TIME_full_cjpd_p1 = toc()
 
 #generate relevant trajectories
 printf("\n");
@@ -231,6 +232,9 @@ tic();
 property_probability = 0;
 encoded_state_trajectory = [3,3,3];
 for i=1:(2^time_horizon)
+
+  encoded_state_trajectory
+  encoded_observations
 	state_trajectory = encoded_state_trajectory.-1;
 	
 	#linear algortithm
@@ -250,10 +254,17 @@ for i=1:(2^time_horizon)
 			predicted_forward = filtered_forward*transition_model;
 			filtered_forward = predicted_forward.*sensor_model(:,encoded_observations(j))';
 		endif
+    printf("p_obs_given_seq%d\n",p_obs_given_seq);
+    printf("p_seq%d\n",p_seq);
+    filtered_forward
 	endfor
 	p_obs = sum(filtered_forward);
 	property_probability += (p_obs_given_seq*p_seq)/p_obs;
-	
+  printf("Total p_obs_given_seq %d\n",p_obs_given_seq);
+  printf("Total p_seq %d\n",p_seq);
+  printf("p_obs %d\n",p_obs);
+  printf("property_prob%d\n",property_probability);
+
 	encoded_state_trajectory(1,time_horizon)++;												#next state trajectory
 	for k=1:(time_horizon-1)
 		if encoded_state_trajectory(1,time_horizon-k+1) > state_card
@@ -267,109 +278,109 @@ TIME_algo_p1 = toc()
 
 
 #property 2: having lost connectivity during the last move
-printf("\n\nproperty 2: having lost connectivity during the last move\n");
-observations = [2,1,0] #plausible observations: [2,1,0], [2,1,0], [2,2,0], [1,1,0]
-encoded_observations = observations.+1;
-time_horizon = length(observations);
+## printf("\n\nproperty 2: having lost connectivity during the last move\n");
+## observations = [2,1,0] #plausible observations: [2,1,0], [2,1,0], [2,2,0], [1,1,0]
+## encoded_observations = observations.+1;
+## time_horizon = length(observations);
 
-#full cjpd
-tic();
-state_card = 4;
-observation_card = 4;
-entry = 1;
-state_trajectory = ones(1,time_horizon);
-total_probability = 0;
-for i=1:state_card^time_horizon															#for each trajectory
-		observation_trajectory = ones(1,time_horizon);
-		c_j_p_d(entry).state_trajectory = state_trajectory;
-		c_j_p_d(entry).observation_trajectory = encoded_observations;									
-		c_j_p_d(entry).probability = 0;
-		for j=1:observation_card^time_horizon											#for each observation trajectory
-			if sum(eq(observation_trajectory, encoded_observations)) == time_horizon
-				temporary_probability = (initial_belief*transition_model)(1,state_trajectory(1,1)) * sensor_model(state_trajectory(1,1),observation_trajectory(1,1));
-				for k=2:time_horizon
-					temporary_probability *= transition_model(state_trajectory(1,k-1),state_trajectory(1,k));
-					temporary_probability *= sensor_model(state_trajectory(1,k),observation_trajectory(1,k));
-				endfor
-				c_j_p_d(entry).probability += temporary_probability;
-				total_probability += temporary_probability;								#total probabilty, for normalization	
-			endif
+## #full cjpd
+## tic();
+## state_card = 4;
+## observation_card = 4;
+## entry = 1;
+## state_trajectory = ones(1,time_horizon);
+## total_probability = 0;
+## for i=1:state_card^time_horizon															#for each trajectory
+## 		observation_trajectory = ones(1,time_horizon);
+## 		c_j_p_d(entry).state_trajectory = state_trajectory;
+## 		c_j_p_d(entry).observation_trajectory = encoded_observations;									
+## 		c_j_p_d(entry).probability = 0;
+## 		for j=1:observation_card^time_horizon											#for each observation trajectory
+## 			if sum(eq(observation_trajectory, encoded_observations)) == time_horizon
+## 				temporary_probability = (initial_belief*transition_model)(1,state_trajectory(1,1)) * sensor_model(state_trajectory(1,1),observation_trajectory(1,1));
+## 				for k=2:time_horizon
+## 					temporary_probability *= transition_model(state_trajectory(1,k-1),state_trajectory(1,k));
+## 					temporary_probability *= sensor_model(state_trajectory(1,k),observation_trajectory(1,k));
+## 				endfor
+## 				c_j_p_d(entry).probability += temporary_probability;
+## 				total_probability += temporary_probability;								#total probabilty, for normalization	
+## 			endif
 
-			observation_trajectory(1,time_horizon)++;									#next observation trajectory
-			for k=1:(time_horizon-1)
-				if observation_trajectory(1,time_horizon-k+1) > observation_card
-					observation_trajectory(1,time_horizon-k+1) = 1;
-					observation_trajectory(time_horizon-k)++;
-				endif
-			endfor
-		endfor
-		entry++;
-		state_trajectory(1,time_horizon)++;												#next state trajectory
-		for k=1:(time_horizon-1)
-			if state_trajectory(1,time_horizon-k+1) > state_card
-				state_trajectory(1,time_horizon-k+1) = 1;
-				state_trajectory(time_horizon-k)++;
-			endif
-		endfor
-endfor
-for i =1:length(c_j_p_d)																#normalize conditional distribution
-	c_j_p_d(i).probability = c_j_p_d(i).probability/total_probability;
-endfor
-#s_c_j_p_d = sort_cjpd(c_j_p_d);	
-#for i = 1:length(s_c_j_p_d)
-#	if s_c_j_p_d(i).probability > 0
-#			printf("P(x=[%s]|o=[%s]) = %f\n", vector2string(s_c_j_p_d(i).state_trajectory(1,:)), vector2string(s_c_j_p_d(i).observation_trajectory(1,:)), s_c_j_p_d(i).probability);
-#	endif
-#endfor
-total_probability;
-#sum over relevant trajectories
-property_probability = 0;
-for i = 1:length(c_j_p_d)
-	if c_j_p_d(i).state_trajectory(1,time_horizon-1) != 1 && c_j_p_d(i).state_trajectory(1,time_horizon) == 1
-		property_probability += c_j_p_d(i).probability;
-	endif
-endfor
-property_probability
-TIME_full_cjpd_p2 = toc()
+## 			observation_trajectory(1,time_horizon)++;									#next observation trajectory
+## 			for k=1:(time_horizon-1)
+## 				if observation_trajectory(1,time_horizon-k+1) > observation_card
+## 					observation_trajectory(1,time_horizon-k+1) = 1;
+## 					observation_trajectory(time_horizon-k)++;
+## 				endif
+## 			endfor
+## 		endfor
+## 		entry++;
+## 		state_trajectory(1,time_horizon)++;												#next state trajectory
+## 		for k=1:(time_horizon-1)
+## 			if state_trajectory(1,time_horizon-k+1) > state_card
+## 				state_trajectory(1,time_horizon-k+1) = 1;
+## 				state_trajectory(time_horizon-k)++;
+## 			endif
+## 		endfor
+## endfor
+## for i =1:length(c_j_p_d)																#normalize conditional distribution
+## 	c_j_p_d(i).probability = c_j_p_d(i).probability/total_probability;
+## endfor
+## #s_c_j_p_d = sort_cjpd(c_j_p_d);	
+## #for i = 1:length(s_c_j_p_d)
+## #	if s_c_j_p_d(i).probability > 0
+## #			printf("P(x=[%s]|o=[%s]) = %f\n", vector2string(s_c_j_p_d(i).state_trajectory(1,:)), vector2string(s_c_j_p_d(i).observation_trajectory(1,:)), s_c_j_p_d(i).probability);
+## #	endif
+## #endfor
+## total_probability;
+## #sum over relevant trajectories
+## property_probability = 0;
+## for i = 1:length(c_j_p_d)
+## 	if c_j_p_d(i).state_trajectory(1,time_horizon-1) != 1 && c_j_p_d(i).state_trajectory(1,time_horizon) == 1
+## 		property_probability += c_j_p_d(i).probability;
+## 	endif
+## endfor
+## property_probability
+## TIME_full_cjpd_p2 = toc()
 
-#generate relevant trajectories
-printf("\n");
-tic();
-property_probability = 0;
-updating_state_trajectory = [2,2];
-for i=1:((state_card-1)^(time_horizon-1))
-	updating_state_trajectory;
-	encoded_state_trajectory = horzcat(updating_state_trajectory,[1]);
-	state_trajectory = encoded_state_trajectory.-1;
+## #generate relevant trajectories
+## printf("\n");
+## tic();
+## property_probability = 0;
+## updating_state_trajectory = [2,2];
+## for i=1:((state_card-1)^(time_horizon-1))
+## 	updating_state_trajectory;
+## 	encoded_state_trajectory = horzcat(updating_state_trajectory,[1]);
+## 	state_trajectory = encoded_state_trajectory.-1;
 	
-	#linear algortithm
-	p_obs_given_seq = 1.0;
-	p_seq = 0.0;
-	for j=1:time_horizon
-		if j == 1
-			predicted_belief = initial_belief*transition_model;
-			#
-			p_obs_given_seq *= sensor_model(encoded_state_trajectory(1),encoded_observations(1));
-			p_seq = predicted_belief(encoded_state_trajectory(1));
-			predicted_forward = initial_belief*transition_model;
-			filtered_forward = predicted_forward.*sensor_model(:,encoded_observations(1))';
-		else
-			p_obs_given_seq *= sensor_model(encoded_state_trajectory(j),encoded_observations(j));
-			p_seq *= transition_model(encoded_state_trajectory(j-1),encoded_state_trajectory(j));
-			predicted_forward = filtered_forward*transition_model;
-			filtered_forward = predicted_forward.*sensor_model(:,encoded_observations(j))';
-		endif
-	endfor
-	p_obs = sum(filtered_forward);
-	property_probability += (p_obs_given_seq*p_seq)/p_obs;
+## 	#linear algortithm
+## 	p_obs_given_seq = 1.0;
+## 	p_seq = 0.0;
+## 	for j=1:time_horizon
+## 		if j == 1
+## 			predicted_belief = initial_belief*transition_model;
+## 			#
+## 			p_obs_given_seq *= sensor_model(encoded_state_trajectory(1),encoded_observations(1));
+## 			p_seq = predicted_belief(encoded_state_trajectory(1));
+## 			predicted_forward = initial_belief*transition_model;
+## 			filtered_forward = predicted_forward.*sensor_model(:,encoded_observations(1))';
+## 		else
+## 			p_obs_given_seq *= sensor_model(encoded_state_trajectory(j),encoded_observations(j));
+## 			p_seq *= transition_model(encoded_state_trajectory(j-1),encoded_state_trajectory(j));
+## 			predicted_forward = filtered_forward*transition_model;
+## 			filtered_forward = predicted_forward.*sensor_model(:,encoded_observations(j))';
+## 		endif
+## 	endfor
+## 	p_obs = sum(filtered_forward);
+## 	property_probability += (p_obs_given_seq*p_seq)/p_obs;
 	
-	updating_state_trajectory(1,time_horizon-1)++;												#next state trajectory
-	for k=1:(time_horizon-2)
-		if updating_state_trajectory(1,time_horizon-k) > state_card
-			updating_state_trajectory(1,time_horizon-k) = 2;
-			updating_state_trajectory(time_horizon-k-1)++;
-		endif
-	endfor
-endfor
-property_probability
-TIME_algo_p2 = toc()
+## 	updating_state_trajectory(1,time_horizon-1)++;												#next state trajectory
+## 	for k=1:(time_horizon-2)
+## 		if updating_state_trajectory(1,time_horizon-k) > state_card
+## 			updating_state_trajectory(1,time_horizon-k) = 2;
+## 			updating_state_trajectory(time_horizon-k-1)++;
+## 		endif
+## 	endfor
+## endfor
+## property_probability
+## TIME_algo_p2 = toc()

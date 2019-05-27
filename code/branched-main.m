@@ -8,7 +8,7 @@
 #################################################
 #################################################
 
-model_choice = "sick";		#"rain" for the rain model, "sick" for the sickness model, "random" for autogeneration
+model_choice = "rain";		#"rain" for the rain model, "sick" for the sickness model, "random" for autogeneration
 observation_vector = [1,1];	#integers referring to columns in the sensor model, use "0" for <missing>, or "random" for autogeneration
 
 #################################################
@@ -315,10 +315,10 @@ function p = compute_l_resistance(g_b, t_m_a, s_m_a, o_v, u_v, l)
 		if i == 1 
 			#initial ground belief prediction (and optional filtering)
 			predicted_forward = aggregated_g_b*aggregated_t_m;
-			filtered_forward = predicted_forward.*aggregated_s_m(:,aggregated_o_v(1,i))';
+			filtered_forward = predicted_forward .* aggregated_s_m(:,aggregated_o_v(1,i))';
 		else
 			predicted_forward = filtered_forward*aggregated_t_m;
-			filtered_forward = predicted_forward.*aggregated_s_m(:,aggregated_o_v(1,i))';
+			filtered_forward = predicted_forward .* aggregated_s_m(:,aggregated_o_v(1,i))';
 		endif
 	endfor
 	p_obs = sum(filtered_forward) #0.27875
@@ -356,29 +356,30 @@ print_resistance_vector(resistance_vector);
 
 
 	printf("\n"); l=2;
+  o_card = columns(sensor_model_array.val)
 	#compute l resistance at step 1
 	s1_before_o = ground_belief*transition_model_array.val;
-	temp = s1_before_o.*sensor_model_array.val(:,observation_vector(1))';
+	temp = s1_before_o .* sensor_model_array.val(:,observation_vector(1))';
 	s1_after_o = temp./sum(temp)
 	#backward factor
 	t = 2; k = 1; #just the renaming of constants
 	backward_k = t; #backward index
 	for i=1:(t-k+1)
 		if backward_k == t 
-			backward = ones(1, 3);
+			backward = ones(1, o_card);
 		else 
 			#[num_obs, bool] = str2num(substr(observations, backward_k+1, 1));
 			obs = observation_vector(backward_k+1);
-			new_backward = zeros(1, 3);
-			for j=1:3
-				new_backward += sensor_model_array.val(j,obs).*backward(1,j).*transition_model_array.val(:,j)';
-			#new_backward += sensor_set(1).sensor_model(j,num_obs).*backward(1,j).*transition_set(1).transition_model(:,j)';
+			new_backward = zeros(1, o_card);
+			for j=1:o_card
+				new_backward += sensor_model_array.val(j,obs)   .*   backward(1,j)   .*   transition_model_array.val(:,j)';
+			#new_backward += sensor_set(1).sensor_model(j,num_obs) .* backward(1,j) .* transition_set(1).transition_model(:,j)';
 			endfor
 			backward = new_backward;		
 		endif	
 		backward_k--;	
 	endfor
-	smoothed_belief = s1_after_o.*backward;
+	smoothed_belief = s1_after_o  .*  backward;
 	smoothed_belief = smoothed_belief./sum(smoothed_belief)
 	p_of_l_resistance_1 = sum(smoothed_belief(1:l)) #BE CAREFUL OF THE ROUNDING UP!!!
 	
@@ -391,29 +392,30 @@ print_resistance_vector(resistance_vector);
 
 
 	#compute l resistance at step 2
-	s2_before_o = smoothed_belief*transition_model_array.val
-	s2_before_o = s2_before_o./sum(s2_before_o)
-	temp = s2_before_o.*sensor_model_array.val(:,observation_vector(2))';
+	## s2_before_o = smoothed_belief*transition_model_array.val
+	s2_before_o = s1_after_o*transition_model_array.val
+	#s2_before_o = s2_before_o./sum(s2_before_o)
+	temp = s2_before_o .* sensor_model_array.val(:,observation_vector(2))';
 	s2_after_o = temp./sum(temp)
 	#backward factor
 	t = 2; k = 2; #just the renaming of constants
 	backward_k = t; #backward index
 	for i=1:(t-k+1)
 		if backward_k == t 
-			backward = ones(1, 3);
+			backward = ones(1, o_card);
 		else 
 			#[num_obs, bool] = str2num(substr(observations, backward_k+1, 1));
 			obs = observation_vector(backward_k+1);
-			new_backward = zeros(1, 3);
-			for j=1:3
-				new_backward += sensor_model_array.val(j,obs).*backward(1,j).*transition_model_array.val(:,j)';
-			#new_backward += sensor_set(1).sensor_model(j,num_obs).*backward(1,j).*transition_set(1).transition_model(:,j)';
+			new_backward = zeros(1, o_card);
+			for j=1:o_card
+				new_backward += sensor_model_array.val(j,obs) .* backward(1,j) .* transition_model_array.val(:,j)';
+			#new_backward += sensor_set(1).sensor_model(j,num_obs) .* backward(1,j) .* transition_set(1).transition_model(:,j)';
 			endfor
 			backward = new_backward;		
 		endif	
 		backward_k--;	
 	endfor
-	smoothed_belief2 = s2_after_o.*backward;
+	smoothed_belief2 = s2_after_o .* backward;
 	smoothed_belief2 = smoothed_belief2./sum(smoothed_belief2)
 	p_of_l_resistance_2 = sum(s2_after_o(1:l)) #BE CAREFUL OF THE ROUNDING UP!!!
 

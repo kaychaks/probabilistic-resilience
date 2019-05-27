@@ -1,4 +1,4 @@
-#! /usr/bin/octave -qf
+#! /usr/local/bin/octave -qf
 #Ubuntu's interpreter /usr/bin/octave
 #OSX's interpreter /usr/local/bin/octave
 
@@ -9,7 +9,7 @@
 #################################################
 
 model_choice = "sick";		#"rain" for the rain model, "sick" for the sickness model, "random" for autogeneration
-observation_vector = [1,1];	#integers referring to columns in the sensor model, use "0" for <missing>, or "random" for autogeneration
+observation_vector = [1,1,1];	#integers referring to columns in the sensor model, use "0" for <missing>, or "random" for autogeneration
 experiments = 1;		#number of times the "main" is repeated
 
 #################################################

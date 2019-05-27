@@ -6,10 +6,10 @@
 ##{
 #rain model
 ground_belief = [0.5, 0.5]; #P(rain, no rain)
-transition_set(1).transition_model = [0.8, 0.2; #P(rain, no rain|it was raining)
-		    0.2, 0.8]; #P(rain, no rain|it wasn't raining)
-sensor_set(1).sensor_model = [0.8, 0.2; #P(umbrella, no umbrella|it is raining)
-		0.1, 0.9]; #P(umbrella, no umbrella|it isn't raining)
+transition_set(1).transition_model = [0.7, 0.3; #P(rain, no rain|it was raining)
+		    0.3, 0.7]; #P(rain, no rain|it wasn't raining)
+sensor_set(1).sensor_model = [0.9, 0.1; #P(umbrella, no umbrella|it is raining)
+		0.2, 0.8]; #P(umbrella, no umbrella|it isn't raining)
 #}
 
 #{
@@ -24,8 +24,8 @@ sensor_set(1).sensor_model = [0.9, 0.05, 0.05; #P(normal, warm, very warm|is hea
 #}
 
 #querying the model
-query_at_time_step = 1; #the time step at which we compute the marginal of the hidden variable
-observations = "22"; #values refer to a column in the sensor model, use "-" for <no observation>
+query_at_time_step = 2; #the time step at which we compute the marginal of the hidden variable
+observations = "11"; #values refer to a column in the sensor model, use "-" for <no observation>
 #the length of the time horizon is the maximum among "query_at_time_step" and "length(observations)"
 #if "query_at_time_step" > "length(observations)" we assume <no observation> ("-") in the interval [length(observations), query_at_time_step]
 produce_inference = 1; #boolean variable saying to execute the inference algorithms block
@@ -171,9 +171,9 @@ endfunction
 function retval = compatible_traj(this_traj, template_traj)
 	retval = 1;
 	if length(this_traj) != length(template_traj)
-		printf("strings of different length\n");
+	  printf("strings of different length\n");
 		retval = 0;
-		break;
+    ## break;
 	endif
 	for i=1:length(this_traj)
 		if !strcmp(substr(this_traj,i,1),substr(template_traj,i,1)) && !strcmp(substr(template_traj,i,1),"-")
@@ -425,7 +425,7 @@ for i=1:(last_t)
 		ml_trajectory = strcat(ml_trajectory, num2str(index)); #build most likely sequence
 	endif
 endfor
-ml_trajectory = "11";
+## ml_trajectory = "111211";
 #compute probability of the ml sequence given the observations P(seq|obs) as (P(obs|seq)*P(seq))/P(obs)
 #1) P(obs|seq) from the sensor model
 p_obs_given_seq = 1.0;
